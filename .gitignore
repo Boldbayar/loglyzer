@@ -39,3 +39,7 @@ coverage/
 
 # Release artifacts
 dist/
+
+# Test files
+analysis.json
+error_logs/
