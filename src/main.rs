@@ -1,35 +1,28 @@
-mod analyzer;
-mod normalizer;
+mod payload;
+
+mod cli;
+mod services;
 mod ui;
 mod utils;
 
-use analyzer::analyze_logs;
-use clap::Parser;
+use services::service_analyzer::analyze_logs;
+use services::service_normalizer::normalize_logs;
+
 use colored::Colorize;
 use dotenvy::dotenv;
-use normalizer::normalize_logs;
 use std::env;
 use tracing::{error, warn};
 use tracing_subscriber;
 use ui::{error as ui_error, *};
-use utils::classifier::{LogLevel, classify};
-use utils::file_loader::read_logs_from_folder;
-use utils::lang_detector::detect_language;
-use utils::output::{AnalysisResult, save_result};
 
-struct Categorized {
-    errors: Vec<(String, usize)>,
-    warnings: Vec<(String, usize)>,
-    infos: Vec<(String, usize)>,
-}
+use utils::util_classifier::{LogLevel, classify};
+use utils::util_file_loader::read_logs_from_folder;
+use utils::util_file_writer::{AnalysisResult, save_result};
+use utils::util_lang_detector::detect_language;
 
-#[derive(Parser)]
-struct Args {
-    folder: String,
-
-    #[arg(long, default_value = "error")]
-    level: String, // error, info, all
-}
+use clap::Parser;
+use cli::cli_args::Args;
+use payload::models::Categorized;
 
 fn initialize() {
     tracing_subscriber::fmt::init();
