@@ -152,7 +152,7 @@ async fn main() {
 
             match handle_output(&args.output, &analysis).await {
                 Ok(_) => {
-                    success("Output saved successfully");
+                    success("Output generated successfully");
                 }
                 Err(e) => {
                     error!(error = %e, "Failed to save output");
