@@ -1,7 +1,8 @@
+use crate::cli::cli_args::LogLevel;
 use serde_json::Value;
 use std::collections::HashMap;
 
-pub fn normalize_logs(logs: &str, level: &str) -> HashMap<String, usize> {
+pub fn normalize_logs(logs: &str, level: &LogLevel) -> HashMap<String, usize> {
     let mut map = HashMap::new();
 
     for line in logs.lines() {
@@ -14,10 +15,9 @@ pub fn normalize_logs(logs: &str, level: &str) -> HashMap<String, usize> {
                 let severity = parsed["severity"].as_str().unwrap_or("").to_lowercase();
 
                 let should_include = match level {
-                    "error" => severity == "error",
-                    "info" => severity == "info",
-                    "all" => true,
-                    _ => severity == "error",
+                    LogLevel::Error => severity == "error",
+                    LogLevel::Info => severity == "info",
+                    LogLevel::All => true,
                 };
                 if !should_include {
                     continue;

@@ -17,12 +17,13 @@ use ui::{error as ui_error, *};
 
 use utils::util_classifier::{LogLevel, classify};
 use utils::util_file_loader::read_logs_from_folder;
-use utils::util_file_writer::{AnalysisResult, save_result};
+use utils::util_file_writer::AnalysisResult;
 use utils::util_lang_detector::detect_language;
 
 use clap::Parser;
 use cli::cli_args::Args;
 use payload::models::Categorized;
+use utils::util_output_handler::handle_output;
 
 fn initialize() {
     tracing_subscriber::fmt::init();
@@ -70,7 +71,6 @@ async fn main() {
     initialize();
 
     let args = Args::parse();
-
     let api_key = env::var("OPENAI_API_KEY").expect("Missing OPENAI_API_KEY");
 
     // ── Load logs ─────────────────────────────
@@ -140,8 +140,7 @@ async fn main() {
     match analyze_logs(summary, api_key).await {
         Ok(ai_output) => {
             spinner.finish_and_clear();
-
-            success("Analysis complete");
+            success("Analysis complete.");
 
             println!("\n{}", ai_output);
 
@@ -151,9 +150,15 @@ async fn main() {
                 ai_summary: ai_output,
             };
 
-            save_result(&analysis);
-
-            success("Saved to analysis.json");
+            match handle_output(&args.output, &analysis).await {
+                Ok(_) => {
+                    success("Output saved successfully");
+                }
+                Err(e) => {
+                    error!(error = %e, "Failed to save output");
+                    ui_error(&format!("Failed to save output: {}", e));
+                }
+            }
         }
         Err(e) => {
             spinner.finish_and_clear();
